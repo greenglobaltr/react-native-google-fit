@@ -3,6 +3,8 @@ const fitnessScopes = {
     'https://www.googleapis.com/auth/fitness.activity.read',
   FITNESS_ACTIVITY_WRITE:
     'https://www.googleapis.com/auth/fitness.activity.write',
+  FITNESS_HEART_RATE_READ:
+    'https://www.googleapis.com/auth/fitness.heart_rate.read',
   FITNESS_LOCATION_READ:
     'https://www.googleapis.com/auth/fitness.location.read',
   FITNESS_LOCATION_WRITE:
