@@ -14,7 +14,9 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
+
 import java.util.ArrayList;
+
 import android.content.Intent;
 
 import androidx.annotation.RequiresApi;
@@ -99,9 +101,9 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     }
 
     @ReactMethod
-    public void isAuthorized (final Promise promise) {
+    public void isAuthorized(final Promise promise) {
         boolean isAuthorized = false;
-        if (mGoogleFitManager != null && mGoogleFitManager.isAuthorized() ) {
+        if (mGoogleFitManager != null && mGoogleFitManager.isAuthorized()) {
             isAuthorized = true;
         }
         WritableMap map = Arguments.createMap();
@@ -132,7 +134,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     }
 
     @ReactMethod
-    public void getDailyStepCountSamples(double startDate, 
+    public void getDailyStepCountSamples(double startDate,
                                          double endDate,
                                          int bucketInterval,
                                          String bucketUnit,
@@ -154,10 +156,9 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
                                    double endDate,
                                    int bucketInterval,
                                    String bucketUnit,
-                                   Promise promise)
-    {
+                                   Promise promise) {
         try {
-            promise.resolve(mGoogleFitManager.getActivityHistory().getActivitySamples((long)startDate, (long)endDate, bucketInterval, bucketUnit));
+            promise.resolve(mGoogleFitManager.getActivityHistory().getActivitySamples((long) startDate, (long) endDate, bucketInterval, bucketUnit));
         } catch (IllegalViewOperationException e) {
             promise.reject(e);
         }
@@ -165,9 +166,9 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
 
     @ReactMethod
     public void getUserInputSteps(double startDate,
-                                double endDate,
-                                Callback errorCallback,
-                                Callback successCallback) {
+                                  double endDate,
+                                  Callback errorCallback,
+                                  Callback successCallback) {
         try {
             mGoogleFitManager.getStepHistory().getUserInputSteps((long) startDate, (long) endDate, successCallback);
         } catch (IllegalViewOperationException e) {
@@ -193,11 +194,13 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
                                  double endDate,
                                  int bucketInterval,
                                  String bucketUnit,
+                                 boolean nonLimit,
                                  Promise promise) {
         try {
             BodyHistory bodyHistory = mGoogleFitManager.getBodyHistory();
             bodyHistory.setDataType(DataType.TYPE_WEIGHT);
-            promise.resolve(bodyHistory.getHistory((long)startDate, (long)endDate, bucketInterval, bucketUnit));
+            bodyHistory.setDataLimit(nonLimit);
+            promise.resolve(bodyHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
         } catch (IllegalViewOperationException e) {
             promise.reject(e);
         }
@@ -212,7 +215,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
         try {
             BodyHistory bodyHistory = mGoogleFitManager.getBodyHistory();
             bodyHistory.setDataType(DataType.TYPE_HEIGHT);
-            promise.resolve(bodyHistory.getHistory((long)startDate, (long)endDate, bucketInterval, bucketUnit));
+            promise.resolve(bodyHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
         } catch (IllegalViewOperationException e) {
             promise.reject(e);
         }
@@ -363,7 +366,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
         try {
             HeartrateHistory heartrateHistory = mGoogleFitManager.getHeartrateHistory();
             heartrateHistory.setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE);
-            promise.resolve(heartrateHistory.getHistory((long)startDate, (long)endDate, bucketInterval, bucketUnit));
+            promise.resolve(heartrateHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
         } catch (IllegalViewOperationException e) {
             promise.reject(e);
         }
@@ -379,7 +382,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
         try {
             HeartrateHistory heartrateHistory = mGoogleFitManager.getHeartrateHistory();
             heartrateHistory.setDataType(DataType.TYPE_HEART_RATE_BPM);
-            promise.resolve(heartrateHistory.getHistory((long)startDate, (long)endDate, bucketInterval, bucketUnit));
+            promise.resolve(heartrateHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
         } catch (IllegalViewOperationException e) {
             promise.reject(e);
         }
@@ -398,8 +401,8 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
 
     @ReactMethod
     public void saveHydration(ReadableArray hydrationArray,
-                           Callback errorCallback,
-                           Callback successCallback) {
+                              Callback errorCallback,
+                              Callback successCallback) {
         try {
             HydrationHistory hydrationHistory = mGoogleFitManager.getHydrationHistory();
             successCallback.invoke(hydrationHistory.save(hydrationArray));
@@ -407,6 +410,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
             errorCallback.invoke(e.getMessage());
         }
     }
+
     @ReactMethod
     public void deleteHydration(ReadableMap options, Callback errorCallback, Callback successCallback) {
         try {
@@ -421,7 +425,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     @ReactMethod
     public void getSleepSamples(double startDate, double endDate, Promise promise) {
         try {
-           mGoogleFitManager.getSleepHistory().getSleepData((long)startDate, (long)endDate, promise);
+            mGoogleFitManager.getSleepHistory().getSleepData((long) startDate, (long) endDate, promise);
         } catch (Error e) {
             promise.reject(e);
         }
