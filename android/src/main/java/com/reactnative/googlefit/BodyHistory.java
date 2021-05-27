@@ -1,10 +1,9 @@
 /**
  * Copyright (c) 2017-present, Stanislav Doskalenko - doskalenko.s@gmail.com
  * All rights reserved.
- *
+ * <p>
  * This source code is licensed under the MIT-style license found in the
  * LICENSE file in the root directory of this source tree.
- *
  **/
 
 package com.reactnative.googlefit;
@@ -42,30 +41,49 @@ public class BodyHistory {
     private GoogleFitManager googleFitManager;
     private DataSet Dataset;
     private DataType dataType;
+    private Boolean nonLimit = false;
 
     private static final String TAG = "Body History";
 
-    public BodyHistory(ReactContext reactContext, GoogleFitManager googleFitManager, DataType dataType){
+    public BodyHistory(ReactContext reactContext, GoogleFitManager googleFitManager, DataType dataType) {
         this.mReactContext = reactContext;
         this.googleFitManager = googleFitManager;
         this.dataType = dataType;
     }
 
-    public BodyHistory(ReactContext reactContext, GoogleFitManager googleFitManager){
+    public BodyHistory(ReactContext reactContext, GoogleFitManager googleFitManager) {
         this(reactContext, googleFitManager, DataType.TYPE_WEIGHT);
     }
 
     public void setDataType(DataType dataType) {
         this.dataType = dataType;
     }
+    public void setDataLimit(Boolean nonLimit) {
+        this.nonLimit = nonLimit;
+    }
 
     public ReadableArray getHistory(long startTime, long endTime, int bucketInterval, String bucketUnit) {
         // for height we need to take time, since GoogleFit foundation - https://stackoverflow.com/questions/28482176/read-the-height-in-googlefit-in-android
-        startTime = this.dataType == DataType.TYPE_WEIGHT ? startTime : 1401926400;
+       // startTime = this.dataType == DataType.TYPE_WEIGHT ? startTime : 1401926400;
         DataReadRequest.Builder readRequestBuilder = new DataReadRequest.Builder()
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS);
-        readRequestBuilder.read(this.dataType);
-        readRequestBuilder.setLimit(1);
+
+        if (this.dataType == DataType.TYPE_WEIGHT) {
+            if (nonLimit) {
+                readRequestBuilder
+                        .bucketByTime(bucketInterval, HelperUtil.processBucketUnit(bucketUnit))
+                        .aggregate(this.dataType, DataType.AGGREGATE_WEIGHT_SUMMARY);
+            } else {
+                readRequestBuilder.read(this.dataType);
+                readRequestBuilder.setLimit(1);
+            }
+
+
+        } else {
+            readRequestBuilder.read(this.dataType);
+            readRequestBuilder.setLimit(1); // need only one height, since it's unchangable
+        }
+
         DataReadRequest readRequest = readRequestBuilder.build();
 
         DataReadResult dataReadResult = Fitness.HistoryApi.readData(googleFitManager.getGoogleApiClient(), readRequest).await(1, TimeUnit.MINUTES);
@@ -90,13 +108,14 @@ public class BodyHistory {
         return map;
     }
 
+
     public boolean save(ReadableMap sample) {
         this.Dataset = createDataForRequest(
                 this.dataType,    // for height, it would be DataType.TYPE_HEIGHT
                 DataSource.TYPE_RAW,
                 sample.getDouble("value"),                  // weight in kgs, height in metrs
-                (long)sample.getDouble("date"),              // start time
-                (long)sample.getDouble("date"),                // end time
+                (long) sample.getDouble("date"),              // start time
+                (long) sample.getDouble("date"),                // end time
                 TimeUnit.MILLISECONDS                // Time Unit, for example, TimeUnit.MILLISECONDS
         );
         new InsertAndVerifyDataTask(this.Dataset).execute();
@@ -148,12 +167,13 @@ public class BodyHistory {
 
     /**
      * This method creates a dataset object to be able to insert data in google fit
-     * @param dataType DataType Fitness Data Type object
+     *
+     * @param dataType       DataType Fitness Data Type object
      * @param dataSourceType int Data Source Id. For example, DataSource.TYPE_RAW
-     * @param value Object Values for the fitness data. They must be int or float
-     * @param startTime long Time when the fitness activity started
-     * @param endTime long Time when the fitness activity finished
-     * @param timeUnit TimeUnit Time unit in which period is expressed
+     * @param value          Object Values for the fitness data. They must be int or float
+     * @param startTime      long Time when the fitness activity started
+     * @param endTime        long Time when the fitness activity finished
+     * @param timeUnit       TimeUnit Time unit in which period is expressed
      * @return
      */
     private DataSet createDataForRequest(DataType dataType, int dataSourceType, Double value,
@@ -198,7 +218,12 @@ public class BodyHistory {
             // most recent sample is not an option), so use average value to maximise the match between values
             // returned here and values as reported by Google Fit app
             if (this.dataType == DataType.TYPE_WEIGHT) {
-                bodyMap.putDouble("value", dp.getValue(Field.FIELD_WEIGHT).asFloat());
+                if (nonLimit) {
+                    bodyMap.putDouble("value", dp.getValue(Field.FIELD_AVERAGE).asFloat());
+                } else {
+                    bodyMap.putDouble("value", dp.getValue(Field.FIELD_WEIGHT).asFloat());
+                }
+
             } else {
                 bodyMap.putDouble("value", dp.getValue(Field.FIELD_HEIGHT).asFloat());
             }
