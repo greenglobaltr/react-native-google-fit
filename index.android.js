@@ -314,13 +314,14 @@ class RNGoogleFit {
    */
 
   getWeightSamples = async (options) => {
-    const { startDate, endDate, bucketInterval, bucketUnit } = prepareInput(options);
+    const { startDate, endDate, bucketInterval, bucketUnit,nonLimit } = prepareInput(options);
 
     const raw_result = await googleFit.getWeightSamples(
       startDate,
       endDate,
       bucketInterval,
-      bucketUnit
+      bucketUnit,
+      nonLimit
     );
 
     if (raw_result.length > 0) {
