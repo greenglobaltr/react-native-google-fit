@@ -231,7 +231,9 @@ declare module 'react-native-google-fit' {
     bucketUnit: BucketUnit
   };
 
-  type rawSteps = Array<{startDate: string, endDate: string, steps: number}>;
+  type rawSteps = Array<{
+    addedBy: Boolean;
+    startDate: string, endDate: string, steps: number}>;
   
   export type StepsResponse = {
     source: string,
@@ -240,6 +242,7 @@ declare module 'react-native-google-fit' {
   };
 
   export type CalorieResponse = {
+    addedBy: string,
     calorie: number,
     endDate: string,
     startDate: string,
@@ -254,6 +257,7 @@ declare module 'react-native-google-fit' {
   };
 
   export type HeartRateResponse = {
+    addedBy: string,
     startDate: string,
     endDate: string,
     value: number,
@@ -261,6 +265,7 @@ declare module 'react-native-google-fit' {
   };
 
   export type BloodPressureResponse = {
+    addedBy: string,
     startDate: string,
     endDate: string,
     diastolic: number,
