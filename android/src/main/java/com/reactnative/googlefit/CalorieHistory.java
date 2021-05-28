@@ -155,6 +155,7 @@ public class CalorieHistory {
                 stepMap.putString("day", day);
                 stepMap.putDouble("startDate", dp.getStartTime(TimeUnit.MILLISECONDS));
                 stepMap.putDouble("endDate", dp.getEndTime(TimeUnit.MILLISECONDS));
+                stepMap.putString("addedBy", dp.getOriginalDataSource().getAppPackageName());
                 float basal = 0;
                 if (basalCalculation) {
                     try {
