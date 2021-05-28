@@ -198,6 +198,7 @@ public class HeartrateHistory {
                 stepMap.putString("day", day);
                 stepMap.putDouble("startDate", dp.getStartTime(TimeUnit.MILLISECONDS));
                 stepMap.putDouble("endDate", dp.getEndTime(TimeUnit.MILLISECONDS));
+                stepMap.putString("addedBy", dp.getOriginalDataSource().getAppPackageName());
                 if (this.dataType == HealthDataTypes.TYPE_BLOOD_PRESSURE) {
                     stepMap.putDouble("diastolic", dp.getValue(HealthFields.FIELD_BLOOD_PRESSURE_DIASTOLIC).asFloat());
                     stepMap.putDouble("systolic", dp.getValue(HealthFields.FIELD_BLOOD_PRESSURE_SYSTOLIC).asFloat());
