@@ -570,7 +570,39 @@ class RNGoogleFit {
     const result = await googleFit.saveSleep(options);
     return result;
   }
+
+ saveBloodPressure(options , callback) {
+   options.date = Date.parse(options.date)
+   console.log({options})
+    googleFit.saveBloodPressure(options,
+        (msg) => {
+          callback(msg, false)
+        },
+        (res) => {
+          if (res.length > 0) {
+            callback(false, prepareResponse(res, 'value'))
+          } else {
+            callback('There is no any blood pressure data for this period', false)
+          }
+        })
+  }
+
+  saveHeartRate(options , callback) {
+    options.date = Date.parse(options.date)
+    googleFit.saveHeartRate(options,
+        (msg) => {
+          callback(msg, false)
+        },
+        (res) => {
+          if (res.length > 0) {
+            callback(false, prepareResponse(res, 'value'))
+          } else {
+            callback('There is no any heart rate data for this period', false)
+          }
+        })
+  }
 }
+
 
 export default new RNGoogleFit()
 
