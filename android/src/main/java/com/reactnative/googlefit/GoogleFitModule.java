@@ -289,6 +289,41 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     }
 
     @ReactMethod
+    public void saveHeartRate(ReadableMap heartRateSample,
+                              Callback errorCallback,
+                              Callback successCallback) {
+        try {
+            HeartrateHistory heartRateHistory = mGoogleFitManager.getHeartrateHistory();
+            successCallback.invoke(heartRateHistory.save(heartRateSample));
+        } catch (IllegalViewOperationException e) {
+            errorCallback.invoke(e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void saveBloodPressure(ReadableMap bloodSample,
+                                  Callback errorCallback,
+                                  Callback successCallback) {
+        try {
+            BloodPressureHistory bodyHistory = mGoogleFitManager.getBloodPressureHistory();
+            successCallback.invoke(bodyHistory.save(bloodSample));
+        } catch (IllegalViewOperationException e) {
+            errorCallback.invoke(e.getMessage());
+        }
+    }
+    @ReactMethod
+    public void saveCalorie(ReadableMap bloodSample,
+                                  Callback errorCallback,
+                                  Callback successCallback) {
+        try {
+            CalorieHistory bodyHistory = mGoogleFitManager.getCalorieHistory();
+            successCallback.invoke(bodyHistory.saveFood(bloodSample));
+        } catch (IllegalViewOperationException e) {
+            errorCallback.invoke(e.getMessage());
+        }
+    }
+
+    @ReactMethod
     public void deleteWeight(ReadableMap options, Callback errorCallback, Callback successCallback) {
         try {
             BodyHistory bodyHistory = mGoogleFitManager.getBodyHistory();
@@ -298,6 +333,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
             errorCallback.invoke(e.getMessage());
         }
     }
+
 
     @ReactMethod
     public void deleteHeight(ReadableMap options, Callback errorCallback, Callback successCallback) {
@@ -364,9 +400,8 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
                                         String bucketUnit,
                                         Promise promise) {
         try {
-            HeartrateHistory heartrateHistory = mGoogleFitManager.getHeartrateHistory();
-            heartrateHistory.setDataType(HealthDataTypes.TYPE_BLOOD_PRESSURE);
-            promise.resolve(heartrateHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
+            BloodPressureHistory bloodPressureHistory = mGoogleFitManager.getBloodPressureHistory();
+            promise.resolve(bloodPressureHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
         } catch (IllegalViewOperationException e) {
             promise.reject(e);
         }
