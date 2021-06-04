@@ -13,14 +13,12 @@ package com.reactnative.googlefit;
 
 import android.os.Build;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import androidx.annotation.RequiresApi;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -31,11 +29,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptionsExtension;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.FitnessOptions;
-import com.google.android.gms.fitness.data.DataPoint;
-import com.google.android.gms.fitness.data.DataSet;
-import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
-import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.data.Session;
 import com.google.android.gms.fitness.request.SessionInsertRequest;
 import com.google.android.gms.fitness.request.SessionReadRequest;
@@ -46,9 +40,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import android.util.Log;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.TimeZone;
@@ -103,15 +94,6 @@ public class SleepHistory {
                             sleepData.putString("addedBy", session.getAppPackageName());
                             sleepData.putString("startDate", dateFormat.format(session.getStartTime(TimeUnit.MILLISECONDS)));
                             sleepData.putString("endDate", dateFormat.format(session.getEndTime(TimeUnit.MILLISECONDS)));
-
-                            // If the sleep session has finer granularity sub-components, extract them:
-                            List<DataSet> dataSets = response.getDataSet(session);
-                            WritableArray granularity = Arguments.createArray();
-                            for (DataSet dataSet : dataSets) {
-                                processDataSet(dataSet, granularity);
-                            }
-                            sleepData.putArray("granularity", granularity);
-
                             sleepSample.pushMap(sleepData);
                         }
                         promise.resolve(sleepSample);
@@ -125,49 +107,11 @@ public class SleepHistory {
                 });
     }
 
-    private void processDataSet(DataSet dataSet, WritableArray granularity) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        for (DataPoint dp : dataSet.getDataPoints()) {
-            WritableMap sleepStage = Arguments.createMap();
-
-            sleepStage.putInt("sleepStage", dp.getValue(Field.FIELD_SLEEP_SEGMENT_TYPE).asInt());
-            sleepStage.putString("startDate", dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
-            sleepStage.putString("endDate", dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS)));
-
-            granularity.pushMap(sleepStage);
-        }
-    }
-
     public void saveSleep(ReadableMap foodSample, final Promise promise) {
-        ReadableArray stageArr = foodSample.getArray("granularity");
-
-        //construct data
-        DataSource dataSource = new DataSource.Builder()
-                .setType(DataSource.TYPE_RAW)
-                .setDataType(DataType.TYPE_SLEEP_SEGMENT)
-                .setAppPackageName(this.mReactContext)
-                .build();
-
-        DataSet dataset = DataSet.builder(dataSource).build();
-
-        for(int i =0; i <  stageArr.size(); i++) {
-            final ReadableMap stage = stageArr.getMap(i);
-            dataset.add(
-                    DataPoint.builder(dataSource)
-                            .setTimeInterval(
-                                    (long)stage.getDouble("startDate"),
-                                    (long)stage.getDouble("endDate"),
-                                    TimeUnit.MILLISECONDS)
-                            .setField(Field.FIELD_SLEEP_SEGMENT_TYPE, stage.getInt("sleepStage"))
-                            .build()
-            );
-        }
 
         //save data
         FitnessOptions fitnessOptions = FitnessOptions.builder()
                 .accessSleepSessions(FitnessOptions.ACCESS_WRITE)
-                .addDataType(DataType.TYPE_SLEEP_SEGMENT, FitnessOptions.ACCESS_WRITE)
                 .build();
 
         Session session = new Session.Builder()
@@ -182,7 +126,6 @@ public class SleepHistory {
         // Build the request to insert the session.
         SessionInsertRequest request = new SessionInsertRequest.Builder()
                 .setSession(session)
-                .addDataSet(dataset)
                 .build();
 
         Fitness.getSessionsClient(this.mReactContext, GoogleSignIn.getAccountForExtension(this.mReactContext, fitnessOptions))
