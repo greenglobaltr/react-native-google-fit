@@ -306,7 +306,6 @@ declare module 'react-native-google-fit' {
     addedBy: string,
     startDate: string,
     endDate: string,
-    granularity: Granularity[]
   }
 
   export type SleepSample = {
@@ -315,14 +314,8 @@ declare module 'react-native-google-fit' {
     sessionName: string,
     identifier: string,
     description: string,
-    granularity: Granularity[]
   }
 
-  export type Granularity = {
-    startDate: string | number,
-    endDate: string | number,
-    sleepStage: number,
-  }
 
   export enum MealType {
     UNKNOWN = 0,
