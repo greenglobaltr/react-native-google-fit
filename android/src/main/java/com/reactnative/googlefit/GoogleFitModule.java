@@ -311,10 +311,11 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
             errorCallback.invoke(e.getMessage());
         }
     }
+
     @ReactMethod
     public void saveCalorie(ReadableMap bloodSample,
-                                  Callback errorCallback,
-                                  Callback successCallback) {
+                            Callback errorCallback,
+                            Callback successCallback) {
         try {
             CalorieHistory bodyHistory = mGoogleFitManager.getCalorieHistory();
             successCallback.invoke(bodyHistory.saveFood(bloodSample));
@@ -408,6 +409,20 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     }
 
     @ReactMethod
+    public void getBloodGlucoseSamples(double startDate,
+                                       double endDate,
+                                       int bucketInterval,
+                                       String bucketUnit,
+                                       Promise promise) {
+        try {
+            BloodGlucoseHistory bloodGlucoseHistory = mGoogleFitManager.getBloodGlucoseHistory();
+            promise.resolve(bloodGlucoseHistory.getHistory((long) startDate, (long) endDate, bucketInterval, bucketUnit));
+        } catch (IllegalViewOperationException e) {
+            promise.reject(e);
+        }
+    }
+
+    @ReactMethod
     public void getHeartRateSamples(double startDate,
                                     double endDate,
                                     int bucketInterval,
@@ -472,6 +487,18 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
             mGoogleFitManager.getSleepHistory().saveSleep(sleepSample, promise);
         } catch (Error e) {
             promise.reject(e);
+        }
+    }
+
+    @ReactMethod
+    public void saveBloodGlucose(ReadableMap bloodGlucoseSample,
+                                 Callback errorCallback,
+                                 Callback successCallback) {
+        try {
+            BloodGlucoseHistory bloodGlucoseHistory = mGoogleFitManager.getBloodGlucoseHistory();
+            successCallback.invoke(bloodGlucoseHistory.save(bloodGlucoseSample));
+        } catch (IllegalViewOperationException e) {
+            errorCallback.invoke(e.getMessage());
         }
     }
 }
