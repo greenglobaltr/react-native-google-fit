@@ -566,6 +566,19 @@ class RNGoogleFit {
     return prepareResponse(result, "addedBy");
   }
 
+  getBloodGlucoseSamples = async (options) => {
+    const { startDate, endDate, bucketInterval, bucketUnit } = prepareInput(options);
+
+    const result = await googleFit.getBloodGlucoseSamples(
+        startDate,
+        endDate,
+        bucketInterval,
+        bucketUnit
+    );
+
+    return prepareResponse(result, "addedBy");
+  }
+
   saveSleep = async (options) => {
     const result = await googleFit.saveSleep(options);
     return result;
@@ -573,7 +586,6 @@ class RNGoogleFit {
 
  saveBloodPressure(options , callback) {
    options.date = Date.parse(options.date)
-   console.log({options})
     googleFit.saveBloodPressure(options,
         (msg) => {
           callback(msg, false)
@@ -583,6 +595,22 @@ class RNGoogleFit {
             callback(false, prepareResponse(res, 'value'))
           } else {
             callback('There is no any blood pressure data for this period', false)
+          }
+        })
+  }
+
+
+  saveBloodGlucose(options , callback) {
+    options.date = Date.parse(options.date)
+    googleFit.saveBloodGlucose(options,
+        (msg) => {
+          callback(msg, false)
+        },
+        (res) => {
+          if (res.length > 0) {
+            callback(false, prepareResponse(res, 'value'))
+          } else {
+            callback('There is no any blood glucose data for this period', false)
           }
         })
   }
